@@ -1,8 +1,7 @@
 import * as cdk from '@aws-cdk/core';
-import * as ecs from '@aws-cdk/aws-ecs';
-import * as ecr from '@aws-cdk/aws-ecr';
-import * as alb from "@aws-cdk/aws-ecs-patterns";
-import { ICluster } from '@aws-cdk/aws-ecs';
+import { ApplicationLoadBalancedFargateService } from '@aws-cdk/aws-ecs-patterns';
+import { Repository } from '@aws-cdk/aws-ecr'
+import { ICluster, ContainerImage, FargateTaskDefinition, LogDrivers } from '@aws-cdk/aws-ecs';
 import { IHostedZone } from '@aws-cdk/aws-route53';
 
 const env = {
@@ -16,21 +15,21 @@ export class BackendStack extends cdk.Stack {
 
     // //? RecruitAPI Service
     // //! RecruitAPI Repository
-    const RecruitRepository = ecr.Repository.fromRepositoryName(this,
+    const RecruitRepository = Repository.fromRepositoryName(this,
       "recruit_api",
       "recruit_api",
     )
 
     //! RecruitAPI Task Create
-    const RecruitTask      = new ecs.FargateTaskDefinition(this, "RecruitTask")
+    const RecruitTask      = new FargateTaskDefinition(this, "RecruitTask")
     const RecruitContainer = RecruitTask.addContainer("RecruitContainer", {
-      image: ecs.ContainerImage.fromEcrRepository(RecruitRepository, "v1.1.0"),
+      image: ContainerImage.fromEcrRepository(RecruitRepository, "v1.1.0"),
       environment: {
         AWS_ACCESS_KEY_ID: "AKIA5ST545RYD6ST62AO",
         AWS_SECRET_ACCESS_KEY: "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",
         ENDPOINT: "https://dynamodb.ap-northeast-1.amazonaws.com",
       },
-      logging: ecs.LogDrivers.awsLogs({
+      logging: LogDrivers.awsLogs({
         streamPrefix: "RecruitLogs"
       })
     })
@@ -41,7 +40,7 @@ export class BackendStack extends cdk.Stack {
     RecruitContainer.addToExecutionPolicy
 
     //! RecruitTadsk ALB Create
-    const RecruitALB = new alb.ApplicationLoadBalancedFargateService(this, "RecruitService", {
+    const RecruitALB = new ApplicationLoadBalancedFargateService(this, "RecruitService", {
       cluster: HEW2021_Cluster,
       memoryLimitMiB: 256,
       cpu: 256,
@@ -57,21 +56,21 @@ export class BackendStack extends cdk.Stack {
     })
 
     //? EndUserAPI Service
-    const EndUseRepository = ecr.Repository.fromRepositoryName(this,
+    const EndUseRepository = Repository.fromRepositoryName(this,
       "end_user_api",
       "end_user_api",
     )
 
     //! EndUserAPI Task Create
-    const EndUserTask      = new ecs.FargateTaskDefinition(this, "EndUserTask")
+    const EndUserTask      = new FargateTaskDefinition(this, "EndUserTask")
     const EndUserContainer = EndUserTask.addContainer("EndUserContainer", {
-      image: ecs.ContainerImage.fromEcrRepository(EndUseRepository, "v1.0.9"),
+      image: ContainerImage.fromEcrRepository(EndUseRepository, "v1.0.9"),
       environment: {
         AWS_ACCESS_KEY_ID: "AKIA5ST545RYD6ST62AO",
         AWS_SECRET_ACCESS_KEY: "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",
         ENDPOINT: "https://dynamodb.ap-northeast-1.amazonaws.com",
       },
-      logging: ecs.LogDrivers.awsLogs({
+      logging: LogDrivers.awsLogs({
         streamPrefix: "EndUserLogs"
       })
     })
@@ -81,7 +80,7 @@ export class BackendStack extends cdk.Stack {
     })
 
     //! EndUserTask ALB Create
-    const EndUserALB = new alb.ApplicationLoadBalancedFargateService(this, "EndUserService", {
+    const EndUserALB = new ApplicationLoadBalancedFargateService(this, "EndUserService", {
       cluster: HEW2021_Cluster,
       memoryLimitMiB: 256,
       cpu: 256,
@@ -98,16 +97,16 @@ export class BackendStack extends cdk.Stack {
 
     //? ConnpassAPI Service
     //! ConnpassAPI Repository
-    const ConnpassRepository = ecr.Repository.fromRepositoryName(this,
+    const ConnpassRepository = Repository.fromRepositoryName(this,
       "connpass_api",
       "connpass_api",
     )
 
     //! ConnpassAPI Task Create
-    const ConnpassTask      = new ecs.FargateTaskDefinition(this, "ConnpassTask")
+    const ConnpassTask      = new FargateTaskDefinition(this, "ConnpassTask")
     const ConnpassContainer = ConnpassTask.addContainer("ConnpassContainer", {
-      image: ecs.ContainerImage.fromEcrRepository(ConnpassRepository, "v1.0.1"),
-      logging: ecs.LogDrivers.awsLogs({
+      image: ContainerImage.fromEcrRepository(ConnpassRepository, "v1.0.1"),
+      logging: LogDrivers.awsLogs({
         streamPrefix: "ConnpassLogs"
       })
     })
@@ -117,7 +116,7 @@ export class BackendStack extends cdk.Stack {
     })
 
     //! ConnpassAPI ALB Create
-    const ConnpassALB = new alb.ApplicationLoadBalancedFargateService(this, "ConnpassService", {
+    const ConnpassALB = new ApplicationLoadBalancedFargateService(this, "ConnpassService", {
       cluster: HEW2021_Cluster,
       memoryLimitMiB: 256,
       cpu: 256,

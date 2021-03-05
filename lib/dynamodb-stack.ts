@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core';
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import { Table,AttributeType } from '@aws-cdk/aws-dynamodb';
 
 export class DynamoDBStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -8,10 +8,10 @@ export class DynamoDBStack extends cdk.Stack {
 
     //! EndUsers Table Create
     //! PrimaryKey: uid(STRING)
-    new dynamodb.Table(this, "end_users", {
+    new Table(this, "end_users", {
       partitionKey: {
         name: "uid",
-        type: dynamodb.AttributeType.STRING
+        type: AttributeType.STRING
       },
       tableName: "EndUsers",
       removalPolicy: cdk.RemovalPolicy.DESTROY
@@ -19,10 +19,10 @@ export class DynamoDBStack extends cdk.Stack {
 
     //! Recruit Table Create
     //! PrimaryKey: id(NUMBER)
-    new dynamodb.Table(this, "recruits", {
+    new Table(this, "recruits", {
       partitionKey: {
         name: "id",
-        type: dynamodb.AttributeType.NUMBER
+        type: AttributeType.NUMBER
       },
       tableName: "Recruits",
       removalPolicy: cdk.RemovalPolicy.DESTROY
@@ -30,10 +30,10 @@ export class DynamoDBStack extends cdk.Stack {
 
     //! AtomicCounter Table Create
     //! PrimaryKey: countKey(STRING)
-    new dynamodb.Table(this, "atomiccounters", {
+    new Table(this, "atomiccounters", {
       partitionKey: {
         name: "countKey",
-        type: dynamodb.AttributeType.STRING
+        type: AttributeType.STRING
       },
       tableName: "AtomicCounter",
       removalPolicy: cdk.RemovalPolicy.DESTROY
