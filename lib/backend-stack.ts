@@ -3,6 +3,7 @@ import { ApplicationLoadBalancedFargateService } from '@aws-cdk/aws-ecs-patterns
 import { Repository } from '@aws-cdk/aws-ecr'
 import { ICluster, ContainerImage, FargateTaskDefinition, LogDrivers } from '@aws-cdk/aws-ecs';
 import { IHostedZone } from '@aws-cdk/aws-route53';
+import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 
 const env = {
   region: process.env.CDK_DEFAULT_REGION,
@@ -13,12 +14,18 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, HEW2021_Cluster: ICluster, raityupiyodev: IHostedZone ,props?: cdk.StackProps) {
     super(scope, id, props ? props : { env });
 
-    // //? RecruitAPI Service
-    // //! RecruitAPI Repository
+    //? RecruitAPI Service
+    //! RecruitAPI Repository
     const RecruitRepository = Repository.fromRepositoryName(this,
       "recruit_api",
       "recruit_api",
     )
+
+    //! RecruitAPI LogGroup
+    const RecruitLogGroup = new LogGroup(this, "RecruitLogGroup", {
+      logGroupName: "RecruitLogGroup",
+      retention: RetentionDays.ONE_WEEK
+    })
 
     //! RecruitAPI Task Create
     const RecruitTask      = new FargateTaskDefinition(this, "RecruitTask")
@@ -30,7 +37,8 @@ export class BackendStack extends cdk.Stack {
         ENDPOINT: "https://dynamodb.ap-northeast-1.amazonaws.com",
       },
       logging: LogDrivers.awsLogs({
-        streamPrefix: "RecruitLogs"
+        streamPrefix: "RecruitLogs",
+        logGroup: RecruitLogGroup,
       })
     })
     RecruitContainer.addPortMappings({
@@ -56,10 +64,17 @@ export class BackendStack extends cdk.Stack {
     })
 
     //? EndUserAPI Service
+    //! EndUserAPI Repository
     const EndUseRepository = Repository.fromRepositoryName(this,
       "end_user_api",
       "end_user_api",
     )
+
+    //! EndUserAPI LogGroup
+    const EndUserLogGroup = new LogGroup(this, "EndUserLogGroup", {
+      logGroupName: "EndUserLogGroup",
+      retention: RetentionDays.ONE_WEEK
+    })
 
     //! EndUserAPI Task Create
     const EndUserTask      = new FargateTaskDefinition(this, "EndUserTask")
@@ -71,7 +86,8 @@ export class BackendStack extends cdk.Stack {
         ENDPOINT: "https://dynamodb.ap-northeast-1.amazonaws.com",
       },
       logging: LogDrivers.awsLogs({
-        streamPrefix: "EndUserLogs"
+        streamPrefix: "EndUserLogs",
+        logGroup: EndUserLogGroup,
       })
     })
     EndUserContainer.addPortMappings({
@@ -102,12 +118,19 @@ export class BackendStack extends cdk.Stack {
       "connpass_api",
     )
 
+    //! ConnpassAPI LogGroup
+    const ConnpassLogGroup = new LogGroup(this, "ConnpassLogGroup", {
+      logGroupName: "ConnpassLogGroup",
+      retention: RetentionDays.ONE_WEEK
+    })
+
     //! ConnpassAPI Task Create
     const ConnpassTask      = new FargateTaskDefinition(this, "ConnpassTask")
     const ConnpassContainer = ConnpassTask.addContainer("ConnpassContainer", {
       image: ContainerImage.fromEcrRepository(ConnpassRepository, "v1.0.1"),
       logging: LogDrivers.awsLogs({
-        streamPrefix: "ConnpassLogs"
+        streamPrefix: "ConnpassLogs",
+        logGroup: ConnpassLogGroup,
       })
     })
     ConnpassContainer.addPortMappings({
